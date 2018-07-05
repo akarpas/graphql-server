@@ -1,18 +1,46 @@
 const express = require('express')
 const express_graphql = require('express-graphql')
 const { buildSchema } = require('graphql')
+const moviesData = require('./data/moviesData')
 
 // Create a simple GraphQL schema
 const schema = buildSchema(`
   type Query {
-    message: String
+    movie(id: Int!): Movie
+    movies(genre: String): [Movie]
+  },
+  type Movie {
+    id: Int
+    title: String
+    director: String
+    synopsis: String
+    genre: String
   }
 `)
+
+const getMovie = (args) => {
+  const id = args.id
+  return moviesData.filter(movie => {
+    return movie.id === id
+  })[0]
+}
+
+const getMovies = (args) => {
+  if (args.genre) {
+    const genre = args.genre
+    return moviesData.filter(
+      movie => movie.genre === genre
+    )
+  } else {
+    return moviesData
+  }
+}
 
 // Create root resolver
 // A resolver contains the mapping of actions to functions
 const root = {
-  message: () => 'Hello World!'
+  movie: getMovie,
+  movies: getMovies
 }
 
 // Create Express server with a GraphQL endpoint
