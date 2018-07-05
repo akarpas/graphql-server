@@ -9,6 +9,9 @@ const schema = buildSchema(`
     movie(id: Int!): Movie
     movies(genre: String): [Movie]
   },
+  type Mutation {
+    updateMovieSynopsis(id: Int!, synopsis: String!): Movie
+  },
   type Movie {
     id: Int
     title: String
@@ -36,11 +39,22 @@ const getMovies = (args) => {
   }
 }
 
+const updateMovieSynopsis = ({id, synopsis}) => {
+  moviesData.map(movie => {
+    if (movie.id === id) {
+      movie.synopsis = synopsis
+      return movie
+    }
+  })
+  return moviesData.filter(movie => movie.id === id)[0]
+}
+
 // Create root resolver
 // A resolver contains the mapping of actions to functions
 const root = {
   movie: getMovie,
-  movies: getMovies
+  movies: getMovies,
+  updateMovieSynopsis: updateMovieSynopsis
 }
 
 // Create Express server with a GraphQL endpoint
