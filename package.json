@@ -4,7 +4,7 @@
   "description": "Basic GraphQL Server",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon serverTwo.js",
+    "start": "nodemon serverThree.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,6 +25,8 @@
   "dependencies": {
     "express": "^4.16.3",
     "express-graphql": "^0.6.12",
-    "graphql": "^0.13.2"
+    "graphql": "^0.13.2",
+    "mongodb": "^3.1.1",
+    "mongoose": "^5.2.2"
   }
 }
