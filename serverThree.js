@@ -1,93 +1,32 @@
 const express = require('express')
-const express_graphql = require('express-graphql')
-const { buildSchema } = require('graphql')
-const moviesData = require('./data/moviesData')
+const { MongoClient, ObjectID } = require('mongodb')
+const bodyParser = require('body-parser')
+const { graphqlExpress, graphiqlExpress } = require('graphql-server-express')
+const makeExecutableSchema = require('graphql-tools')
+const cors = require('cors')
 
-const mongoose = require('mongoose')
-const SoundcloudChart = require('./models/soundcloudChart')
+const URL = 'http://localhost'
+const PORT = '4000'
+const DB = 'lm-develop'
+const MONGO_URL = 'mongodb://localhost:27017/lm-develop'
 
-
-const url = 'mongodb://localhost:27017/lm-develop'
-mongoose.connect(url, { useNewUrlParser: true })
-mongoose.Promise = global.Promise
-const db = mongoose.connection
-
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.on('open', () => {
-    console.log('Connected to Mongo')
-  }
-)
-
-// Create a simple GraphQL schema
-const schema = buildSchema(`
-  type Query {
-    movie(id: Int!): Movie
-    movies(genre: String): [Movie]
-  },
-  type Mutation {
-    updateMovieSynopsis(id: Int!, synopsis: String!): Movie
-  },
-  type Movie {
-    id: Int
-    title: String
-    director: String
-    synopsis: String
-    genre: String
-  }
-`)
-
-const getMovie = (args) => {
-  const id = args.id
-  return moviesData.filter(movie => {
-    return movie.id === id
-  })[0]
+const prepare = (o) => {
+  o._id = o._id.toString()
+  return o
 }
 
-const getMovies = (args) => {
-  if (args.genre) {
-    const genre = args.genre
-    return moviesData.filter(
-      movie => movie.genre === genre
-    )
-  } else {
-    return moviesData
-  }
-}
+const start = async () => {
+  const client = await MongoClient.connect(MONGO_URL, { useNewUrlParser: true })
+  const db = client.db(DB)
+  const SoundcloudCharts = db.collection('soundcloudchart')
 
-const updateMovieSynopsis = ({id, synopsis}) => {
-  moviesData.map(movie => {
-    if (movie.id === id) {
-      movie.synopsis = synopsis
-      return movie
+  const typeDefs = [`
+    type Query {
+
     }
-  })
-  return moviesData.filter(movie => movie.id === id)[0]
+  `
+  ]
+
 }
 
-// Create root resolver
-// A resolver contains the mapping of actions to functions
-const root = {
-  movie: getMovie,
-  movies: getMovies,
-  updateMovieSynopsis: updateMovieSynopsis
-}
-
-// Create Express server with a GraphQL endpoint
-const app = express()
-
-// APP.USE Parameters:
-// 1 - URL Endpoint as string (/graphql)
-// 2 - Result of the express_graphql function is handed over
-// containing 3 properties (schema, rootValue, graphiql)
-app.use('/graphql', express_graphql({
-  schema: schema,
-  rootValue: root,
-  graphiql: true
-}))
-
-app.listen(
-  4000,
-  () => console.log(
-    'Express GraphQL Server Now Running on Port 4000 (localhost:4000/graphql)'
-  )
-)
+start()
