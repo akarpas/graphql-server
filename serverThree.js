@@ -18,11 +18,37 @@ const prepare = (o) => {
 const start = async () => {
   const client = await MongoClient.connect(MONGO_URL, { useNewUrlParser: true })
   const db = client.db(DB)
-  const SoundcloudCharts = db.collection('soundcloudchart')
+  const soundcloudCharts = db.collection('soundcloudcharts')
+
+  // soundcloudCharts.find({}).toArray((err, docs) => {
+  //   docs.forEach(doc => {
+  //     console.log(doc.trackName)
+  //   })
+  // })
 
   const typeDefs = [`
     type Query {
+      chart(user: String): SoundcloudChart
+    }
 
+    type SoundcloudChart {
+      _id: String
+      chartType: String
+      chartDate: Date
+      chartGenre: Sting
+      trackName: String
+      artist: String
+      user: String
+      userId: String
+      trackPosition: Number
+      songGenre: String
+      trackScore: Number
+      trackLikes: Number
+      trackPlaycount: Number
+    }
+
+    schema {
+      query: Query
     }
   `
   ]
