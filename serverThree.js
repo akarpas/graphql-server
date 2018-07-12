@@ -1,58 +1,66 @@
-const express = require('express')
-const { MongoClient, ObjectID } = require('mongodb')
-const bodyParser = require('body-parser')
-const { graphqlExpress, graphiqlExpress } = require('graphql-server-express')
-const makeExecutableSchema = require('graphql-tools')
-const cors = require('cors')
+const { MongoClient } = require('mongodb')
+const { GraphQLServer } = require('graphql-yoga')
+const GraphQLDate = require('graphql-date')
 
-const URL = 'http://localhost'
-const PORT = '4000'
+const PORT = 5050
 const DB = 'lm-develop'
 const MONGO_URL = 'mongodb://localhost:27017/lm-develop'
-
-const prepare = (o) => {
-  o._id = o._id.toString()
-  return o
-}
 
 const start = async () => {
   const client = await MongoClient.connect(MONGO_URL, { useNewUrlParser: true })
   const db = client.db(DB)
   const soundcloudCharts = db.collection('soundcloudcharts')
 
-  // soundcloudCharts.find({}).toArray((err, docs) => {
-  //   docs.forEach(doc => {
-  //     console.log(doc.trackName)
-  //   })
-  // })
-
   const typeDefs = [`
+    scalar Date
+
     type Query {
-      chart(user: String): SoundcloudChart
+      chart(user: String): [SoundcloudChart]
+      charts: [SoundcloudChart]
     }
 
     type SoundcloudChart {
-      _id: String
+      _id: ID!
       chartType: String
       chartDate: Date
-      chartGenre: Sting
+      chartGenre: String
       trackName: String
       artist: String
       user: String
       userId: String
-      trackPosition: Number
+      trackPosition: Int
       songGenre: String
-      trackScore: Number
-      trackLikes: Number
-      trackPlaycount: Number
+      trackScore: Int
+      trackLikes: Int
+      trackPlaycount: Int
     }
 
     schema {
       query: Query
     }
-  `
-  ]
+  `]
 
+  const resolvers = {
+    Date: GraphQLDate,
+    Query: {
+      chart: async (root, {user}) => {
+        return (await soundcloudCharts.find({ user: user }).toArray())
+      },
+      charts: async (root, {}) => {
+        return (await soundcloudCharts.find({}).toArray())
+      } 
+    }
+  }
+
+  const server = new GraphQLServer({
+    typeDefs,
+    resolvers
+  })
+
+  server.start(
+    {port: PORT},
+    () => console.log(`Server is running on http://localhost:${PORT}`)
+  )
 }
 
 start()
