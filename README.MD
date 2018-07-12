@@ -9,11 +9,6 @@ Update package json start script to: "nodemon serverOne.js"
 
 http://localhost:4000/graphql
 
-#### QUERY SAMPLES
-
-![Alt text](./screenshots/query1.png?raw=true "Query Sample 1")
-![Alt text](./screenshots/query2.png?raw=true "Query Sample 2")
-
 ## SERVER 2
 ### Basic Data Querying (Hardcoded Movies)
 
@@ -22,6 +17,11 @@ Update package json start script to: "nodemon serverTwo.js"
 ```npm start```
 
 http://localhost:4000/graphql
+
+#### QUERY SAMPLES
+
+![Alt text](./screenshots/query1.png?raw=true "Query Sample 1")
+![Alt text](./screenshots/query2.png?raw=true "Query Sample 2")
 
 ## SERVER 3
 ### Basic Data Querying With MongoDB (GRAPHQL-YOGA)
